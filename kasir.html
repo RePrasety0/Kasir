@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Toko 2.0</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f8f8;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #menu, #inputForm, #dataBarang {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        p {
+            color: #666;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kasir Toko 2.0</h1>
+    <div id="menu">
+        <p>SILAHKAN PILIH MENU</p>
+        <button onclick="showInputForm()">INPUT DATA BARANG</button>
+        <button onclick="showDataBarang()">TAMPILKAN DATA BARANG</button>
+        <button onclick="hitungPembelian()">HITUNG PEMBELIAN</button>
+        <button onclick="exitProgram()">KELUAR</button>
+    </div>
+
+    <div id="inputForm" style="display:none;">
+        <p>SILAHKAN MASUKKAN NAMA BARANG DAN HARGA</p>
+        <input type="text" id="barangInput" placeholder="Nama Barang : Harga">
+        <button onclick="inputDataBarang()">Tambah Barang</button>
+        <p id="inputStatus"></p>
+        <button onclick="backToMenu()">KEMBALI KE MENU</button>
+    </div>
+
+    <div id="dataBarang" style="display:none;">
+        <h2>Data Barang</h2>
+        <table id="barangTable">
+            <tr>
+                <th>NAMA BARANG</th>
+                <th>HARGA</th>
+            </tr>
+        </table>
+        <button onclick="backToMenu()">KEMBALI KE MENU</button>
+    </div>
+
+    <script>
+        let dataBarang = [];
+        
+        function showInputForm() {
+            document.getElementById("menu").style.display = "none";
+            document.getElementById("inputForm").style.display = "block";
+        }
+
+        function showDataBarang() {
+            if (dataBarang.length === 0) {
+                alert("Data masih kosong, silahkan masukkan data barang");
+            } else {
+                document.getElementById("menu").style.display = "none";
+                document.getElementById("dataBarang").style.display = "block";
+                displayBarang();
+            }
+        }
+
+        function displayBarang() {
+            const table = document.getElementById("barangTable");
+            // Clear existing table rows
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+
+            // Sort the data
+            dataBarang.sort((a, b) => a.localeCompare(b));
+
+            // Populate the table with sorted data
+            for (const item of dataBarang) {
+                const parts = item.split(" : ");
+                const namaBarang = parts[0];
+                const hargaBarang = parts[1];
+                
+                const row = table.insertRow(-1);
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.textContent = namaBarang;
+                cell2.textContent = hargaBarang;
+            }
+        }
+
+        function inputDataBarang() {
+            const input = document.getElementById("barangInput").value.trim();
+            if (input !== "") {
+                dataBarang.push(input);
+                document.getElementById("inputStatus").textContent = "Data telah masuk ke dalam sistem.";
+                document.getElementById("barangInput").value = "";
+            } else {
+                document.getElementById("inputStatus").textContent = "Format input tidak valid.";
+            }
+        }
+
+        function hitungPembelian() {
+            if (dataBarang.length === 0) {
+                alert("Data masih kosong, silahkan masukkan data barang");
+                return;
+            }
+
+            let lagi;
+            let totalPembelian = 0;
+            let barangDibeli = "";
+
+            do {
+                const barangDicari = prompt("SILAHKAN MASUKKAN NAMA BARANG:");
+                const index = dataBarang.findIndex(item => item.startsWith(barangDicari));
+
+                if (index === -1) {
+                    alert("Barang tidak ditemukan.");
+                } else {
+                    const parts = dataBarang[index].split(" : ");
+                    const namaBarang = parts[0];
+                    const hargaBarang = parseInt(parts[1]);
+                    totalPembelian += hargaBarang;
+                    barangDibeli += namaBarang + " (" + hargaBarang + ")\n";
+                    alert("Barang ditemukan: " + dataBarang[index]);
+                }
+
+                lagi = prompt("APA ADA LAGI? (Y/T):").toUpperCase();
+            } while (lagi === 'Y');
+
+            if (totalPembelian > 0) {
+                alert("TOTAL PEMBELIAN: " + totalPembelian);
+                prosesPembayaran(totalPembelian, barangDibeli);
+            } else {
+                alert("Tidak ada barang yang dibeli.");
+            }
+        }
+
+        function prosesPembayaran(totalPembelian, barangDibeli) {
+            const jumlahUang = parseInt(prompt("MASUKKAN JUMLAH UANG ANDA:"));
+
+            if (jumlahUang < totalPembelian) {
+                alert("Uang Anda kurang.");
+                return;
+            }
+
+            const kembalian = jumlahUang - totalPembelian;
+            alert("KEMBALIAN: " + kembalian);
+            cetakStruk(totalPembelian, kembalian, barangDibeli);
+        }
+
+        function cetakStruk(totalPembelian, kembalian, barangDibeli) {
+            alert("\n===== STRUK PEMBAYARAN =====\n" +
+                  "BARANG YANG DIBELI:\n" + barangDibeli +
+                  "TOTAL PEMBELIAN: " + totalPembelian +
+                  "\nKEMBALIAN: " + kembalian +
+                  "\n============================\n");
+        }
+
+        function backToMenu() {
+            document.getElementById("menu").style.display = "block";
+            document.getElementById("inputForm").style.display = "none";
+            document.getElementById("dataBarang").style.display = "none";
+        }
+
+        function exitProgram() {
+            alert("Terima kasih telah menggunakan program.");
+        }
+    </script>
+</body>
+</html>
